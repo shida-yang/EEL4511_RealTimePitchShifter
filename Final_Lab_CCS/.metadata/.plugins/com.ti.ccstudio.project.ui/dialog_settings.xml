@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="com.ti.ccstudio.project.ui.internal.properties.DynamicPropertiesPageManager">
+	</section>
+	<section name="com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage">
+		<item value="true" key="CCS.IMPORT_FROM_ARCHIVE"/>
+		<item value="true" key="CCS.COPY_INTO_WORKSPACE"/>
+		<item value="false" key="CCS.IMPORT_REFERENCED_PROJECTS"/>
+		<item value="D:\UF_HW\2019_fall_hw\EEE4511\Lab\Lab9\CCS_export.zip" key="CCS.BROWSE_ZIPS_FILTER"/>
+	</section>
+	<section name="com.ti.ccstudio.project.ui.internal.preferences.DynamicPreferencePageManager">
+		<item value="true" key="CCS.VIEW_ADVANCED"/>
+	</section>
+</section>

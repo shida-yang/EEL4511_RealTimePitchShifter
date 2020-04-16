@@ -1,0 +1,19 @@
+additive synthesis
+
+sample sound
+remove silence parts at both ends
+	detect silence by RMS value
+additive synthesis or pitch shifting?
+	additive synthesis
+		obtain envelope data
+			https://www.mathworks.com/help/dsp/examples/envelope-detection.html
+		detect pitch
+			harmonic product spectrum?
+				https://stackoverflow.com/questions/19765486/matlab-code-for-harmonic-product-spectrum
+			https://gist.github.com/fasiha/957035272009eb1c9eb370936a6af2eb		
+			??find high peaks
+		get their magnitude and phase
+		add sine waves accordingly
+		apply envelope
+
+preset ones (known musical instruments)

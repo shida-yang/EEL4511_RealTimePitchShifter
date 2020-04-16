@@ -1,0 +1,418 @@
+/*
+ * Name:        Shida Yang
+ * Lab #:       23195
+ * Description: This program uses SPIB to interface with the
+ *              external SRAM
+ */
+
+#include "SPIB.h"
+
+/*
+ * Description:
+ *      Initialize the GPIO pins for SPIB.
+ * Parameters:
+ *      None
+ * Return:
+ *      None
+ */
+void initSpiGpio(){
+
+    EALLOW;
+
+    /*
+     * GPIO63=SI
+     * GPIO64=SO
+     * GPIO65=SCK
+     * GPIO66=CS0
+     * GPIO67=CS1
+     */
+
+    //Enable internal pullups
+    GpioCtrlRegs.GPBPUD.bit.GPIO63=0;
+    GpioCtrlRegs.GPCPUD.bit.GPIO64=0;
+    GpioCtrlRegs.GPCPUD.bit.GPIO65=0;
+    GpioCtrlRegs.GPCPUD.bit.GPIO66=0;
+    GpioCtrlRegs.GPCPUD.bit.GPIO67=0;
+
+    //Configure GPyGMUX and GPyMUX
+    /*
+     * GPIO63=SI=SPISIMOB
+     * GPIO64=SO=SPISOMIB
+     * GPIO65=SCK=SPICLKB
+     * GPIO66=CS0=GPIO66
+     * GPIO67=CS1=GPIO67
+     */
+    GpioCtrlRegs.GPBGMUX2.bit.GPIO63=3;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO64=3;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO65=3;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO66=0;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO67=0;
+
+    GpioCtrlRegs.GPBMUX2.bit.GPIO63=3;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO64=3;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO65=3;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO66=0;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO67=0;
+
+    //Set qualification to asynchronous
+    GpioCtrlRegs.GPBQSEL2.bit.GPIO63=3;
+    GpioCtrlRegs.GPCQSEL1.bit.GPIO64=3;
+    GpioCtrlRegs.GPCQSEL1.bit.GPIO65=3;
+
+    //Set GPIO66 and GPIO67 as output
+    GpioCtrlRegs.GPCDIR.bit.GPIO66=1;
+    GpioCtrlRegs.GPCDIR.bit.GPIO67=1;
+
+    //pull chip selects high
+    GpioDataRegs.GPCDAT.bit.GPIO66=1;
+    GpioDataRegs.GPCDAT.bit.GPIO67=1;
+
+}
+
+/*
+ * Description:
+ *      Initialize SPI configurations to interface with
+ *      the external SRAM.
+ * Parameters:
+ *      None
+ * Return:
+ *      None
+ */
+void initSpi(){
+
+    EALLOW;
+
+    //enter SPI reset state
+    SpibRegs.SPICCR.bit.SPISWRESET=0;
+
+    //configure CLKPOLARITY and CLKPHASE
+    //our SRAM: write on rising edge, read on falling edge
+    SpibRegs.SPICCR.bit.CLKPOLARITY=0;
+    SpibRegs.SPICTL.bit.CLK_PHASE=1;
+
+    //use master mode
+    SpibRegs.SPICTL.bit.MASTER_SLAVE=1;
+
+    //high speed mode
+    SpibRegs.SPICCR.bit.HS_MODE=1;
+
+    //SPI transmit length=8 bits=1 byte
+    SpibRegs.SPICCR.bit.SPICHAR=7;
+
+    //set SPI clock
+    //ClkCfgRegs.LOSPCP.bit.LSPCLKDIV = 0;
+    //SpibRegs.SPIBRR.bit.SPI_BIT_RATE=127;
+    setSpiClock(40);
+
+    //enable communication
+    SpibRegs.SPICTL.bit.TALK=1;
+
+    //release SPI from reset state
+    SpibRegs.SPICCR.bit.SPISWRESET=1;
+    //run SPI even when emulation suspended
+    SpibRegs.SPIPRI.bit.FREE=1;
+
+}
+
+/*
+ * Description:
+ *      Set SPIB clock (assuming system clock is 200MHz)
+ * Parameters:
+ *      Uint16 spiClkMHz: desired SPI clock in MHz
+ * Return:
+ *      None
+ */
+void setSpiClock(Uint16 spiClkMHz){
+    EALLOW;
+    //LSPCLK=SYSCLK=200MHz
+    ClkCfgRegs.LOSPCP.bit.LSPCLKDIV = 0;
+    //enable high speed mode
+    SpibRegs.SPICCR.bit.HS_MODE=1;
+    //calculate SPIBRR
+    /*
+     * because
+     *      SPICLK=LSPCLK/(SPIBRR+1)
+     * so
+     *      SPIBRR=LSPCLK/SPICLK-1
+     */
+    Uint16 mySPIBRR=200/spiClkMHz-1;
+    //write to the baud rate register
+    SpibRegs.SPIBRR.all=mySPIBRR;
+}
+
+/*
+ * Description:
+ *      Send 8-bit data through SPIB
+ * Parameters:
+ *      Uint16 data: data to be sent
+ * Return:
+ *      Uint16: data received in the SPIB receive buffer
+ */
+Uint16 send8Bits(Uint16 data){
+    data=data<<8; //left-justify the byte
+    SpibRegs.SPIDAT=data;   //write to data register
+    //wait until transmit completes
+    volatile bool transmitIncomplete=!SpibRegs.SPISTS.bit.INT_FLAG;
+    while(transmitIncomplete){
+        transmitIncomplete=!SpibRegs.SPISTS.bit.INT_FLAG;
+    }
+    //return data received in the receive buffer
+    return SpibRegs.SPIRXBUF;
+}
+
+/*
+ * Description:
+ *      Read 8-bit data through SPIB
+ * Parameters:
+ *      None
+ * Return:
+ *      Uint16: data received in the SPIB receive buffer
+ */
+Uint16 read8Bits(){
+    //send dummy byte to receive data
+    return send8Bits(0x45);
+}
+
+/*
+ * Description:
+ *      Write a 16-bit data to external SRAM through SPIB
+ * Parameters:
+ *      Uint32 addr: address to write to
+ *      Uint16 data: data to be written
+ * Return:
+ *      None
+ */
+void writeToSRAM(Uint32 addr, Uint16 data){
+    //each address is two blocks on SRAM
+    //CPU address range=0-256k
+    //SRAM total address range=0-512k
+    addr=addr<<1;
+    //determine which CS1 or CS0 by A18
+    bool isCS1=((Uint32)1<<18)&addr;
+    //get the lower 18 bits of the address because
+    //each SRAM only has 256k address physically
+    addr=addr&0x3FFFF;
+
+    //transmit
+    //bring CS low
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=0;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=0;
+    }
+
+    //send write opcode 0x02
+    send8Bits(0x02);
+    //send out 24bit addr
+    Uint16 tempAddr=(addr&0xFF0000)>>16;//A23:16
+    send8Bits(tempAddr);
+    tempAddr=(addr&0xFF00)>>8;   //A15:8
+    send8Bits(tempAddr);
+    tempAddr=addr&0xFF;   //A7:0
+    send8Bits(tempAddr);
+    //send data (sequential and little endian)
+    Uint16 tempData=data&0xFF;   //D7:0
+    send8Bits(tempData);
+    tempData=(data&0xFF00)>>8;   //D15:8
+    send8Bits(tempData);
+
+    //bring CS high
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=1;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=1;
+    }
+}
+
+/*
+ * Description:
+ *      Read a 16-bit data to external SRAM through SPIB
+ * Parameters:
+ *      Uint32 addr: address to read from
+ * Return:
+ *      Uint16: data read from external SRAM
+ */
+Uint16 readFromSRAM(Uint32 addr){
+
+    Uint16 data=0;
+
+    //each address is two blocks on SRAM
+    //CPU address range=0-256k
+    //SRAM total address range=0-512k
+    addr=addr<<1;
+    //determine which CS1 or CS0 by A18
+    bool isCS1=((Uint32)1<<18)&addr;
+    //get the lower 18 bits of the address because
+    //each SRAM only has 256k address physically
+    addr=addr&0x3FFFF;
+
+    //transmit
+    //bring CS low
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=0;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=0;
+    }
+
+    //send read opcode 0x03
+    send8Bits(0x03);
+    //send out 24bit addr
+    Uint16 tempAddr=(addr&0xFF0000)>>16;//A23:16
+    send8Bits(tempAddr);
+    tempAddr=(addr&0xFF00)>>8;   //A15:8
+    send8Bits(tempAddr);
+    tempAddr=addr&0xFF;   //A7:0
+    send8Bits(tempAddr);
+    //send dummy cycle
+    send8Bits(0x45);
+    //read lowByte
+    Uint16 dataLo=read8Bits();
+    //read highByte
+    Uint16 dataHi=read8Bits();
+    //combine data
+    data=(dataHi<<8)|dataLo;
+
+    //bring CS high
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=1;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=1;
+    }
+
+    return data;
+}
+
+/*
+ * Description:
+ *      Use sequential write to write multiple 16-bit data to external SRAM through SPIB
+ * Parameters:
+ *      Uint32 startAddr: starting address to write to
+ *      Uint16* data: data array to be written
+ *      Uint32 length: length of data array
+ * Return:
+ *      None
+ */
+void seqWrite(Uint32 startAddr, Uint16* data, Uint32 length){
+    //each address is two blocks on SRAM
+    //CPU address range=0-256k
+    //SRAM total address range=0-512k
+    startAddr=startAddr<<1;
+    //determine which CS1 or CS0 by A18
+    bool isCS1=((Uint32)1<<18)&startAddr;
+    //get the lower 18 bits of the address because
+    //each SRAM only has 256k address physically
+    startAddr=startAddr&0x3FFFF;
+
+    //transmit
+    //bring CS low
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=0;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=0;
+    }
+
+    //send write opcode 0x02
+    send8Bits(0x02);
+    //send out 24bit addr
+    Uint16 tempAddr=(startAddr&0xFF0000)>>16;//A23:16
+    send8Bits(tempAddr);
+    tempAddr=(startAddr&0xFF00)>>8;   //A15:8
+    send8Bits(tempAddr);
+    tempAddr=startAddr&0xFF;   //A7:0
+    send8Bits(tempAddr);
+
+    //set up ptr to data array
+    Uint16* ptr=data;
+
+    for(Uint32 i=0; i<length; i++){
+        //send data (sequential and little endian)
+        Uint16 tempData=*ptr&0xFF;   //D7:0
+        send8Bits(tempData);
+        tempData=(*ptr&0xFF00)>>8;   //D15:8
+        send8Bits(tempData);
+        //increment prt
+        ptr++;
+    }
+
+    //bring CS high
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=1;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=1;
+    }
+}
+
+/*
+ * Description:
+ *      Use sequential read to read multiple 16-bit data to external SRAM through SPIB
+ * Parameters:
+ *      Uint32 startAddr: starting address to read from
+ *      Uint32 length: length of data array
+ * Return:
+ *      Uint16*: filled data array with data read
+ */
+Uint16* seqRead(Uint32 startAddr, Uint32 length){
+    Uint16* data=malloc(sizeof(Uint16)*length);
+
+    //each address is two blocks on SRAM
+    //CPU address range=0-256k
+    //SRAM total address range=0-512k
+    startAddr=startAddr<<1;
+    //determine which CS1 or CS0 by A18
+    bool isCS1=((Uint32)1<<18)&startAddr;
+    //get the lower 18 bits of the address because
+    //each SRAM only has 256k address physically
+    startAddr=startAddr&0x3FFFF;
+
+    //transmit
+    //bring CS low
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=0;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=0;
+    }
+
+    //send read opcode 0x03
+    send8Bits(0x03);
+    //send out 24bit addr
+    Uint16 tempAddr=(startAddr&0xFF0000)>>16;//A23:16
+    send8Bits(tempAddr);
+    tempAddr=(startAddr&0xFF00)>>8;   //A15:8
+    send8Bits(tempAddr);
+    tempAddr=startAddr&0xFF;   //A7:0
+    send8Bits(tempAddr);
+    //send dummy cycle
+    send8Bits(0x45);
+
+    //initialize ptr to the starting address of data array
+    Uint16* ptr=data;
+
+    for(Uint32 i=0; i<length; i++){
+        //read lowByte
+        Uint16 dataLo=read8Bits();
+        //read highByte
+        Uint16 dataHi=read8Bits();
+        //combine data
+        *ptr=(dataHi<<8)|dataLo;
+        //inc ptr
+        ptr++;
+    }
+
+
+    //bring CS high
+    if(isCS1){
+        GpioDataRegs.GPCDAT.bit.GPIO67=1;
+    }
+    else{
+        GpioDataRegs.GPCDAT.bit.GPIO66=1;
+    }
+
+    return data;
+}

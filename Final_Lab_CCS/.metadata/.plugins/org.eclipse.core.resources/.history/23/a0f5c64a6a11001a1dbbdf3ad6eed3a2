@@ -1,0 +1,15 @@
+#ifndef I2CLCD_H_
+#define I2CLCD_H_
+
+#include "OneToOneI2CDriver.h"
+#include <F28x_Project.h>
+
+void initLCD();
+void sendString(char* stringToSend);
+void sendStringAutoSwitch(char* stringToSend);
+void writeCommandReg(Uint16 command);
+void writeDataReg(Uint16 data);
+void switchLine();
+void clearScreen();
+
+#endif /* I2CLCD_H_ */
