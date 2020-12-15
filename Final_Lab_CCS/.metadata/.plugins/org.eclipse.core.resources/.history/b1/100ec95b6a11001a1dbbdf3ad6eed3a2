@@ -1,6 +1,0 @@
-#include <F28x_Project.h>
-
-void initGpio();
-Uint16 readSwitch();
-Uint16 readPB();
-void writeToLED(Uint16 data);

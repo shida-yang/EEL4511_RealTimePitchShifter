@@ -25,6 +25,7 @@ __interrupt void Timer0_ISR(void);
 __interrupt void Timer1_ISR(void);
 __interrupt void Timer2_ISR(void);
 __interrupt void adcA1ISR();
+__interrupt void adcA4ISR();
 
 void initDMAInput();
 void initDMAOutput();
@@ -1013,6 +1014,17 @@ int main(){
     initAdcSoc(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_CPU1_TINT0,
                ADC_CH_ADCIN1, 50, ADC_INT_NUMBER1);
 
+    /*
+     * ADCA
+     * SOC4
+     * Trigger source=Timer0 Int
+     * channel: ACDIN1
+     * sampleWindow=50
+     * trigger ADCA INT1 when complete
+     */
+    initAdcSoc(ADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_CPU1_TINT0,
+               ADC_CH_ADCIN4, 50, ADC_INT_NUMBER2);
+
     //init AIC23
     initMcbspbI2S();
     //init SPIA
@@ -1028,14 +1040,16 @@ int main(){
     //point INT to my ISR
     Interrupt_register(INT_DMA_CH1, &dmaCh1ISR);
     Interrupt_register(INT_ADCA1, &adcA1ISR);
+    Interrupt_register(INT_ADCA2, &adcA4ISR);
     //enable INT
     Interrupt_enable(INT_DMA_CH1);
     Interrupt_enable(INT_ADCA1);
+    Interrupt_enable(INT_ADCA2);
     //enable global interrupt
     Interrupt_enableMaster();
 
     while(1){
-        isDistance=GpioDataRegs.GPADAT.bit.GPIO8;
+        //isDistance=GpioDataRegs.GPADAT.bit.GPIO8;
         if(distanceFlag){
             GpioDataRegs.GPESET.bit.GPIO131=1;
             CPUTimer_startTimer(CPUTIMER2_BASE);
@@ -1229,15 +1243,30 @@ __interrupt void adcA1ISR(){
     Uint16 result=ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
     amp=result*0.011936;
     amp=0.1*amp*amp;
-    if(isDistance==0 && key==17){
-        keypad_cont=GpioDataRegs.GPADAT.bit.GPIO9;
-        if(!keypad_cont){
-            amp=0;
-        }
-    }
+//    if(isDistance==0 && key==17){
+//        keypad_cont=GpioDataRegs.GPADAT.bit.GPIO9;
+//        if(!keypad_cont){
+//            amp=0;
+//        }
+//    }
     // Clear the interrupt flag and issue ACK
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+}
+
+__interrupt void adcA4ISR(){
+    //read ADC result
+    Uint16 result=ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
+    pitchShiftRatio = result/4096.0*1.6+0.5;
+//    if(isDistance==0 && key==17){
+//        keypad_cont=GpioDataRegs.GPADAT.bit.GPIO9;
+//        if(!keypad_cont){
+//            amp=0;
+//        }
+//    }
+    // Clear the interrupt flag and issue ACK
+    ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER2);
+    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP10);
 }
 
 //DMA1=ping-pong input
@@ -1481,45 +1510,45 @@ void clearRows(){
 
 Uint16 prev=0;
 Uint16 checkKey(){
-    clearRows();
-    getCols();
-    for(int i=0; i<4; i++){
-        if(cols[i]==0){
-            GpioDataRegs.GPCSET.bit.GPIO94=1;
-            DELAY_US(1);
-            getCols();
-            if(cols[i]==1){
-                prev=i;
-                return i;
-            }
-            clearRows();
-            GpioDataRegs.GPBSET.bit.GPIO52=1;
-            DELAY_US(1);
-            getCols();
-            if(cols[i]==1){
-                prev=4+i;
-                return 4+i;
-            }
-            clearRows();
-            GpioDataRegs.GPBSET.bit.GPIO41=1;
-            DELAY_US(1);
-            getCols();
-            if(cols[i]==1){
-                prev=8+i;
-                return 8+i;
-            }
-            clearRows();
-            GpioDataRegs.GPBSET.bit.GPIO40=1;
-            DELAY_US(1);
-            getCols();
-            if(cols[i]==1){
-                prev=12+i;
-                return 12+i;
-            }
-            return prev;
-        }
-
-    }
+//    clearRows();
+//    getCols();
+//    for(int i=0; i<4; i++){
+//        if(cols[i]==0){
+//            GpioDataRegs.GPCSET.bit.GPIO94=1;
+//            DELAY_US(1);
+//            getCols();
+//            if(cols[i]==1){
+//                prev=i;
+//                return i;
+//            }
+//            clearRows();
+//            GpioDataRegs.GPBSET.bit.GPIO52=1;
+//            DELAY_US(1);
+//            getCols();
+//            if(cols[i]==1){
+//                prev=4+i;
+//                return 4+i;
+//            }
+//            clearRows();
+//            GpioDataRegs.GPBSET.bit.GPIO41=1;
+//            DELAY_US(1);
+//            getCols();
+//            if(cols[i]==1){
+//                prev=8+i;
+//                return 8+i;
+//            }
+//            clearRows();
+//            GpioDataRegs.GPBSET.bit.GPIO40=1;
+//            DELAY_US(1);
+//            getCols();
+//            if(cols[i]==1){
+//                prev=12+i;
+//                return 12+i;
+//            }
+//            return prev;
+//        }
+//
+//    }
     return 17;
 }
 

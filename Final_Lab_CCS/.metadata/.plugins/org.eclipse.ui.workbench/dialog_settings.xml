@@ -40,6 +40,8 @@
 			<item value="14000"/>
 		</list>
 	</section>
+	<section name="MemoryDumperFillAction">
+	</section>
 	<section name="ImportExportAction">
 		<item value="org.eclipse.ui.wizards.export.ZipFile" key="ImportExportPage.STORE_SELECTED_EXPORT_WIZARD_ID"/>
 		<list key="ImportExportPage.STORE_EXPANDED_EXPORT_CATEGORIES">

@@ -1,3 +1,4 @@
+buildConsoleWrapLines_COPY=true
 eclipse.preferences.version=1
 editor_folding_default_comments=true
 editor_folding_default_doc_comments=true

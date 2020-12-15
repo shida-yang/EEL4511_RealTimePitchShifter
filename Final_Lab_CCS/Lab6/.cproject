@@ -44,14 +44,16 @@
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.DIAG_WRAP.1875478496" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.DIAG_WRAP" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.INCLUDE_PATH.785059729" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}"/>
+									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_3_02_00_00\device_support\f2837xd\common\include"/>
+									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_3_02_00_00\device_support\f2837xd\headers\include"/>
+									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_3_02_00_00\driverlib\f2837xd\driverlib"/>
 									<listOptionValue builtIn="false" value="D:\UF_HW\2019_fall_hw\EEE4511\Lab\Lab5\additional_reference\ADC_TIMER_Driverlib\driverlib"/>
-									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_2_00_00_02\device_support\f2837xd\headers\include"/>
-									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_2_00_00_02\device_support\f2837xd\common\include"/>
 									<listOptionValue builtIn="false" value="${CG_TOOL_ROOT}/include"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.ABI.2039408172" name="Application binary interface [See 'General' page to edit] (--abi)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.ABI" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.ABI.coffabi" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.DEFINE.984815174" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.DEFINE" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU1"/>
+									<listOptionValue builtIn="false" value="_DUAL_HEADERS"/>
 									<listOptionValue builtIn="false" value="_LAUNCHXL_F28379D"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.C_DIALECT.877573964" name="C Dialect" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.C_DIALECT" value="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.C_DIALECT.C99" valueType="enumerated"/>
@@ -81,8 +83,32 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.C2000_18.12.hex.718467985" name="C2000 Hex Utility" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.hex"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.ti.ccstudio.buildDefinitions.C2000.Debug.441274135.1093539489" name="/" resourcePath="driverlib">
+						<toolChain id="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.DebugToolchain.1315396092" name="TI Build Tools" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.DebugToolchain" unusedChildren="">
+							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS.1682866991.706009431" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS.1682866991"/>
+							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.1814921036.889076861" name="Compiler version" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.1814921036"/>
+							<targetPlatform id="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.targetPlatformDebug" name="Platform" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.targetPlatformDebug"/>
+							<tool id="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.compilerDebug.1962789960" name="C2000 Compiler" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.compilerDebug.2109423003">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.INCLUDE_PATH.952783533" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compilerID.INCLUDE_PATH" valueType="includePath">
+									<listOptionValue builtIn="false" value="${PROJECT_ROOT}"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/driverlib/inc}"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/driverlib}"/>
+									<listOptionValue builtIn="false" value="D:\UF_HW\2019_fall_hw\EEE4511\Lab\Lab5\additional_reference\ADC_TIMER_Driverlib\driverlib"/>
+									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_2_00_00_02\device_support\f2837xd\headers\include"/>
+									<listOptionValue builtIn="false" value="D:\ti\c2000\C2000Ware_2_00_00_02\device_support\f2837xd\common\include"/>
+									<listOptionValue builtIn="false" value="${CG_TOOL_ROOT}/include"/>
+								</option>
+								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__C_SRCS.1862515008" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__C_SRCS"/>
+								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__CPP_SRCS.800292291" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__CPP_SRCS"/>
+								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__ASM_SRCS.1058710195" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__ASM_SRCS"/>
+								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__ASM2_SRCS.1984103517" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.compiler.inputType__ASM2_SRCS"/>
+							</tool>
+							<tool id="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.linkerDebug.443351435" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.exe.linkerDebug.613570636"/>
+							<tool id="com.ti.ccstudio.buildDefinitions.C2000_18.12.hex.1339503371" name="C2000 Hex Utility" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.12.hex.718467985"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="CFFT_f32u.asm|CFFT_f32_win.asm|Lab8Part3.c|Lab8Part2.c|Lab8Part1.c|Lab6Part4_1.c|Lab6Part4_2.c|Lab7Part3.c|Lab7Part2.c|Lab7Part1.c|Lab7_FIR_TI.c|Lab6Quiz.c|Lab6Part3_3.c|Lab6Part3_2.c|Lab6Part2.c|Lab6Part3_1.c|Lab6Part1.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Common/F2837xD_Adc.c|CFFT_f32u.asm|CFFT_f32_win.asm|Lab8Part3.c|Lab8Part2.c|Lab8Part1.c|Lab6Part4_1.c|Lab6Part4_2.c|Lab7Part3.c|Lab7Part2.c|Lab7Part1.c|Lab7_FIR_TI.c|Lab6Quiz.c|Lab6Part3_3.c|Lab6Part3_2.c|Lab6Part2.c|Lab6Part3_1.c|Lab6Part1.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
